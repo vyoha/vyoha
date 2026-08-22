@@ -75,6 +75,7 @@ a:hover{text-decoration:underline}
   display:inline-flex;align-items:center;gap:7px;margin-bottom:18px;
   font-size:13.5px;color:var(--brand-2);font-weight:600;
 }
+.em-modal .voltar{display:none}
 @media (max-width:640px){
   .cartao{padding:22px 18px 26px;border-radius:12px}
   .topo{padding:20px 16px}
@@ -84,6 +85,7 @@ a:hover{text-decoration:underline}
 </style>
 </head>
 <body>
+<script>if (window.top !== window) document.documentElement.classList.add("em-modal");</script>
 
 <header class="topo">
   <div class="dentro">
