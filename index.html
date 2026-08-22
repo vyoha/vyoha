@@ -789,8 +789,8 @@ body.travado{overflow:hidden}
         <span class="tag tag-vyoha">Vyoha</span>
         <a href="#" data-abre="p-filosofia">Como pensamos</a><a href="#" data-abre="p-metodo">Método</a>
         <a href="#diagnostico">Diagnóstico</a>
-        <a href="/politica-de-privacidade.html">Política de Privacidade</a>
-        <a href="/termos-de-uso.html">Termos de Uso</a>
+        <a href="/politica-de-privacidade.html" data-abre="p-privacidade">Política de Privacidade</a>
+        <a href="/termos-de-uso.html" data-abre="p-termos">Termos de Uso</a>
       </nav>
       <nav class="rod-c" aria-label="Soluções">
         <span class="tag">Soluções</span>
@@ -910,11 +910,35 @@ footer{position:relative;z-index:2;background:rgba(5,21,30,.86);border-top:1px s
 .rod-f{margin-top:clamp(40px,6vh,68px);padding-top:20px;border-top:1px solid var(--linha-2);
   display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;
   font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--txt-3)}
+.pn-legal .pn-in{height:92svh;min-height:0;display:flex;flex-direction:column;overflow:hidden}
+.pn-legal .pn-top{flex:none}
+.pn-legal-t{font-family:var(--mono);font-size:10px;font-weight:400;letter-spacing:.22em;text-transform:uppercase;color:var(--pt-3)}
+.pn-legal .pn-c{padding:0;flex:1;min-height:0;display:flex}
+.pn-legal-frame{width:100%;height:100%;border:0;background:var(--papel)}
+@media(max-width:640px){.pn-legal .pn-in{height:100svh}.pn-legal .pn-top{padding:12px 20px}}
 </style>
 
 </main>
 
 <!-- ═══════════════ PAINÉIS CLAROS ═══════════════ -->
+
+<section class="pn pn-legal" id="p-privacidade" role="dialog" aria-modal="true" aria-labelledby="h-privacidade" hidden>
+  <div class="pn-in">
+    <div class="pn-top"><h2 class="pn-legal-t" id="h-privacidade">Política de Privacidade</h2>
+      <button class="pn-x" type="button" data-fecha aria-label="Fechar Política de Privacidade">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke-linecap="round"/></svg></button></div>
+    <div class="pn-c"><iframe class="pn-legal-frame" src="/politica-de-privacidade.html" title="Política de Privacidade"></iframe></div>
+  </div>
+</section>
+
+<section class="pn pn-legal" id="p-termos" role="dialog" aria-modal="true" aria-labelledby="h-termos" hidden>
+  <div class="pn-in">
+    <div class="pn-top"><h2 class="pn-legal-t" id="h-termos">Termos de Uso</h2>
+      <button class="pn-x" type="button" data-fecha aria-label="Fechar Termos de Uso">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke-linecap="round"/></svg></button></div>
+    <div class="pn-c"><iframe class="pn-legal-frame" src="/termos-de-uso.html" title="Termos de Uso"></iframe></div>
+  </div>
+</section>
 
 <div class="pn" id="p-filosofia" role="dialog" aria-modal="true" aria-labelledby="h-filosofia" hidden>
   <div class="pn-in">
@@ -1451,6 +1475,33 @@ footer{position:relative;z-index:2;background:rgba(5,21,30,.86);border-top:1px s
   /* ═══════════ PAINÉIS DE APROFUNDAMENTO ═══════════
      Fundo claro sobre o petróleo: o visitante sente que mudou de lugar. */
   var aberto = null, focoAntes = null;
+  function focarNoFimLegal(pn) {
+    var fr = pn.querySelector(".pn-legal-frame"), doc = fr && fr.contentDocument;
+    var itens = doc && doc.querySelectorAll("a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled])");
+    if (itens && itens.length) itens[itens.length - 1].focus();
+  }
+  function conectarLegal(pn) {
+    var fr = pn.querySelector(".pn-legal-frame");
+    if (!fr || fr.getAttribute("data-foco-pronto")) return;
+    fr.setAttribute("data-foco-pronto", "true");
+    fr.addEventListener("load", function () {
+      try {
+        var doc = fr.contentDocument;
+        doc.addEventListener("keydown", function (e) {
+          if (e.key === "Escape") { e.preventDefault(); fecharPn(); }
+          if (e.key === "Tab") {
+            var itens = doc.querySelectorAll("a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled])");
+            if (!itens.length || (!e.shiftKey && doc.activeElement === itens[itens.length - 1]) ||
+                (e.shiftKey && doc.activeElement === itens[0])) {
+              e.preventDefault(); var x = pn.querySelector("[data-fecha]"); if (x) x.focus();
+            }
+          }
+        });
+      } catch (erro) { /* o conteúdo continua acessível pela URL própria */ }
+    });
+  }
+  var legais = document.querySelectorAll(".pn-legal");
+  for (var l = 0; l < legais.length; l++) conectarLegal(legais[l]);
   function abrirPn(id) {
     var pn = $(id); if (!pn) return;
     focoAntes = document.activeElement;
@@ -1458,6 +1509,7 @@ footer{position:relative;z-index:2;background:rgba(5,21,30,.86);border-top:1px s
     /* dispara as animações de dentro no quadro seguinte */
     window.requestAnimationFrame(function () { pn.classList.add("aberto"); });
     document.body.classList.add("travado"); aberto = pn;
+    conectarLegal(pn);
     var x = pn.querySelector("[data-fecha]"); if (x && x.focus) x.focus();
   }
   function fecharPn() {
@@ -1474,7 +1526,11 @@ footer{position:relative;z-index:2;background:rgba(5,21,30,.86);border-top:1px s
   }
   var fes = document.querySelectorAll("[data-fecha]");
   for (var f = 0; f < fes.length; f++) fes[f].addEventListener("click", fecharPn);
-  document.addEventListener("keydown", function (e) { if (e.key === "Escape") fecharPn(); });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") fecharPn();
+    if (e.key === "Tab" && e.shiftKey && aberto && aberto.classList.contains("pn-legal") &&
+        document.activeElement === aberto.querySelector("[data-fecha]")) { e.preventDefault(); focarNoFimLegal(aberto); }
+  });
   var pns = document.querySelectorAll(".pn");
   for (var pp = 0; pp < pns.length; pp++) {
     pns[pp].addEventListener("click", function (e) { if (e.target === this) fecharPn(); });
